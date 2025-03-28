@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  bot_ui:
+    container_name: bot_ui
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
