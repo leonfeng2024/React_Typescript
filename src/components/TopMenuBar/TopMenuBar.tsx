@@ -20,7 +20,7 @@ const TopMenuBar: React.FC = () => {
         </button>
         <div className="tmb-avatar">
           <img
-            src="/images/user_profile.png"
+            src="/v5/images/user_profile.png"
             alt="User Avatar"
             className="tmb-avatar-circle"
           />
