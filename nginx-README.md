@@ -1,6 +1,6 @@
 # Nginx 配置说明
 
-本项目中的 `nginx.conf` 文件提供了将 `/v6/` 路径代理到项目 build 目录的配置。
+本项目中的 `nginx.conf` 文件提供了将 `/` 路径代理到项目 build 目录的配置。
 
 ## 使用方法
 
@@ -81,7 +81,7 @@ nginx -s reload
 配置完成后，通过以下URL访问应用：
 
 ```
-http://localhost/v6/
+http://localhost/
 ```
 
 ## Windows 特别说明

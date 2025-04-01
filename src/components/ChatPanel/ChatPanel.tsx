@@ -22,7 +22,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ messages }) => {
         >
           <div className="cp-avatar">
             <img
-              src={message.isUser ? '/v6/images/user_profile.png' : '/v6/images/bot_profile.png'}
+              src={message.isUser ? '/images/user_profile.png' : '/images/bot_profile.png'}
               alt={message.isUser ? 'User Avatar' : 'Bot Avatar'}
             />
           </div>
