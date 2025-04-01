@@ -18,8 +18,7 @@ interface ChatResponse {
 }
 
 export class ChatService {
-  //private static readonly API_URL = 'http://jptyomdmidd001.onetakeda.com/chat';
-  private static readonly API_URL = 'http://localhost/api/chat';
+  private static readonly API_URL = 'http://localhost:8088/api/chat';
   private static readonly TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
   
   public static async sendMessage(query: string): Promise<ChatResponse> {

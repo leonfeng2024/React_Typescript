@@ -74,7 +74,7 @@ const ChatWindow: React.FC = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost/api/file/upload', {
+      const response = await fetch('http://localhost:8088/api/file/upload', {
         method: 'POST',
         body: formData,
       });

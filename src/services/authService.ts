@@ -89,7 +89,7 @@ export const logout = async (): Promise<{ status: string; message: string }> => 
       return { status: 'success', message: 'Logout successful' };
     }
     
-    const response = await fetch('http://localhost/api/logout', {
+    const response = await fetch('http://localhost:8088/api/logout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
