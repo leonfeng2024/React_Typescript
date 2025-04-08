@@ -44,6 +44,14 @@ const ChatWindow: React.FC = () => {
     setInputValue('');
 
     try {
+      const loadingMessage: Message = {
+        id: Date.now().toString(),
+        content: 'ご相談を承りました。現在対応中ですので、少々お待ちください...',
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prevMessages => [...prevMessages, loadingMessage]);
+      
       const response = await ChatService.sendMessage(inputValue);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),

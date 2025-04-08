@@ -1,5 +1,5 @@
 # 第一阶段：构建React应用
-FROM node:18-alpine as builder
+FROM crpi-5va2c7blqnzmwnnn.cn-beijing.personal.cr.aliyuncs.com/aacoe/local_platform:node18-alpine-amd as builder
 
 # 设置工作目录
 WORKDIR /app

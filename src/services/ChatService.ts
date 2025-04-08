@@ -31,6 +31,13 @@ export class ChatService {
         throw new Error('Authentication required. Please log in again.');
       }
 
+      // Return immediate response with loading message
+      const loadingResponse: ChatResponse = {
+        status: 'loading',
+        username: 'system',
+        message: 'ご相談を承りました。現在対応中ですので、少々お待ちください'
+      };
+
       const request: ChatRequest = {
         username: localStorage.getItem('username') || 'user',
         query: query,
