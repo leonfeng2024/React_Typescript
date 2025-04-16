@@ -58,6 +58,152 @@
   word-wrap: break-word;
 }
 
+/* Progress bar styles */
+.cp-progress-container {
+  margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.75rem;
+}
+
+.cp-progress-bar {
+  height: 6px;
+  background-color: #3b82f6;
+  border-radius: 3px;
+  transition: width 0.3s ease-in-out;
+}
+
+.cp-progress-stages {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  position: relative;
+}
+
+.cp-progress-stages::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background-color: #e5e7eb;
+  z-index: 0;
+}
+
+.cp-progress-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.cp-stage-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f3f4f6;
+  border: 2px solid #d1d5db;
+  transition: all 0.3s ease;
+}
+
+.cp-stage-label {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.cp-progress-stage.active .cp-stage-dot {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.cp-progress-stage.active .cp-stage-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.cp-progress-status {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  text-align: center;
+}
+
+/* Styling for markdown elements in bot messages */
+.cp-bot .cp-message-content h1,
+.cp-bot .cp-message-content h2,
+.cp-bot .cp-message-content h3,
+.cp-bot .cp-message-content h4,
+.cp-bot .cp-message-content h5,
+.cp-bot .cp-message-content h6 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.cp-bot .cp-message-content h1 {
+  font-size: 1.5rem;
+}
+
+.cp-bot .cp-message-content h2 {
+  font-size: 1.3rem;
+}
+
+.cp-bot .cp-message-content h3 {
+  font-size: 1.2rem;
+}
+
+.cp-bot .cp-message-content p {
+  margin: 0.5rem 0;
+}
+
+.cp-bot .cp-message-content ul,
+.cp-bot .cp-message-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.cp-bot .cp-message-content li {
+  margin: 0.25rem 0;
+}
+
+.cp-bot .cp-message-content a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.cp-bot .cp-message-content code {
+  background-color: #f3f4f6;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.cp-bot .cp-message-content pre {
+  background-color: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.cp-bot .cp-message-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.cp-bot .cp-message-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: #4b5563;
+}
+
 .cp-message-time {
   font-size: 0.75rem;
   color: #9ca3af;

@@ -8,6 +8,9 @@ interface Message {
   content: string;
   isUser: boolean;
   timestamp: Date;
+  isLoading?: boolean;
+  progressStage?: number; // 0-3 (0: start, 1: user intent, 2: knowledge base, 3: document generation)
+  progressPercent?: number; // 0-100
   sourceDocuments?: {
     document_id: string;
     content: string;
@@ -21,6 +24,7 @@ const ChatWindow: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,6 +33,15 @@ const ChatWindow: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  
+  // Clean up timer when component unmounts
+  useEffect(() => {
+    return () => {
+      if (progressTimerRef.current) {
+        clearTimeout(progressTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -44,23 +57,48 @@ const ChatWindow: React.FC = () => {
     setInputValue('');
 
     try {
+      const loadingId = Date.now().toString();
       const loadingMessage: Message = {
-        id: Date.now().toString(),
+        id: loadingId,
         content: 'ご相談を承りました。現在対応中ですので、少々お待ちください...',
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        isLoading: true,
+        progressStage: 0,
+        progressPercent: 0
       };
       setMessages(prevMessages => [...prevMessages, loadingMessage]);
       
+      // Start progress animation
+      simulateProgress(loadingId);
+      
       const response = await ChatService.sendMessage(inputValue);
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response.message,
-        isUser: false,
-        timestamp: new Date(),
-        sourceDocuments: response.source_documents
-      };
-      setMessages(prevMessages => [...prevMessages, botMessage]);
+      
+      // Complete the progress immediately when the response arrives
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === loadingId 
+            ? { ...msg, progressPercent: 100, progressStage: 3 } 
+            : msg
+        )
+      );
+      
+      // Add small delay before showing the final message
+      setTimeout(() => {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: response.message,
+          isUser: false,
+          timestamp: new Date(),
+          sourceDocuments: response.source_documents
+        };
+        
+        // Remove loading message and add real response
+        setMessages(prevMessages => 
+          prevMessages.filter(msg => msg.id !== loadingId).concat(botMessage)
+        );
+      }, 500);
+      
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -68,9 +106,57 @@ const ChatWindow: React.FC = () => {
         isUser: false,
         timestamp: new Date()
       };
-      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      setMessages(prevMessages => {
+        // Remove loading message and add error message
+        return prevMessages.filter(msg => !msg.isLoading).concat(errorMessage);
+      });
       console.error('Failed to get bot response:', error);
     }
+  };
+  
+  const simulateProgress = (loadingId: string) => {
+    // Random duration between 10-15 seconds
+    const totalDuration = Math.floor(Math.random() * 5000) + 10000;
+    
+    // Define key progress points
+    const stage1 = totalDuration * 0.3; // User intent recognition ~30%
+    const stage2 = totalDuration * 0.6; // Knowledge base query ~60% 
+    const stage3 = totalDuration * 0.9; // Document generation ~90%
+    
+    let startTime = Date.now();
+    let elapsed = 0;
+    
+    const updateProgress = () => {
+      elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / totalDuration) * 100, 99); // Cap at 99% until actual response
+      
+      // Determine the current stage
+      let currentStage = 0;
+      if (elapsed >= stage3) {
+        currentStage = 3;
+      } else if (elapsed >= stage2) {
+        currentStage = 2;
+      } else if (elapsed >= stage1) {
+        currentStage = 1;
+      }
+      
+      // Update the message
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === loadingId 
+            ? { ...msg, progressPercent: progress, progressStage: currentStage } 
+            : msg
+        )
+      );
+      
+      // Continue updating progress if we haven't reached the end
+      if (elapsed < totalDuration) {
+        progressTimerRef.current = setTimeout(updateProgress, 50);
+      }
+    };
+    
+    // Start progress updates
+    progressTimerRef.current = setTimeout(updateProgress, 50);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
