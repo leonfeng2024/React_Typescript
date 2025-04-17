@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github.css';
 import '../../css/ChatPanel/ChatPanel.css';
 
 interface Message {
@@ -10,7 +9,7 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   isLoading?: boolean;
-  progressStage?: number; // 0-3 (0: start, 1: user intent, 2: knowledge base, 3: document generation)
+  progressStage?: number; // 0-4 (0: start, 1: user intent, 2: knowledge base, 3: relationship graph, 4: document generation)
   progressPercent?: number; // 0-100
 }
 
@@ -23,7 +22,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ messages }) => {
     switch (stage) {
       case 1: return "ユーザー意図識別中";
       case 2: return "知識ベース検索中";
-      case 3: return "回答文書生成中";
+      case 3: return "関係図生成中";
+      case 4: return "回答文書生成中";
       default: return "処理開始";
     }
   };
@@ -65,6 +65,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ messages }) => {
                         <div className="cp-stage-label">知識ベース検索</div>
                       </div>
                       <div className={`cp-progress-stage ${message.progressStage! >= 3 ? 'active' : ''}`}>
+                        <div className="cp-stage-dot" />
+                        <div className="cp-stage-label">関係図生成</div>
+                      </div>
+                      <div className={`cp-progress-stage ${message.progressStage! >= 4 ? 'active' : ''}`}>
                         <div className="cp-stage-dot" />
                         <div className="cp-stage-label">回答文書生成</div>
                       </div>

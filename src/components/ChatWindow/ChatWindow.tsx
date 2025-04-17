@@ -9,7 +9,7 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   isLoading?: boolean;
-  progressStage?: number; // 0-3 (0: start, 1: user intent, 2: knowledge base, 3: document generation)
+  progressStage?: number; // 0-4 (0: start, 1: user intent, 2: knowledge base, 3: relationship graph, 4: document generation)
   progressPercent?: number; // 0-100
   sourceDocuments?: {
     document_id: string;
@@ -78,7 +78,7 @@ const ChatWindow: React.FC = () => {
       setMessages(prevMessages => 
         prevMessages.map(msg => 
           msg.id === loadingId 
-            ? { ...msg, progressPercent: 100, progressStage: 3 } 
+            ? { ...msg, progressPercent: 100, progressStage: 4 } 
             : msg
         )
       );
@@ -115,13 +115,14 @@ const ChatWindow: React.FC = () => {
   };
   
   const simulateProgress = (loadingId: string) => {
-    // Random duration between 10-15 seconds
-    const totalDuration = Math.floor(Math.random() * 5000) + 10000;
+    // Random duration between 30-40 seconds
+    const totalDuration = Math.floor(Math.random() * 10000) + 30000;
     
     // Define key progress points
-    const stage1 = totalDuration * 0.3; // User intent recognition ~30%
-    const stage2 = totalDuration * 0.6; // Knowledge base query ~60% 
-    const stage3 = totalDuration * 0.9; // Document generation ~90%
+    const stage1 = totalDuration * 0.05; // User intent recognition ~5%
+    const stage2 = totalDuration * 0.10; // Knowledge base query ~10% 
+    const stage3 = totalDuration * 0.60; // Generate relationship graph ~60%
+    const stage4 = totalDuration * 0.90; // Document generation ~90%
     
     let startTime = Date.now();
     let elapsed = 0;
@@ -132,7 +133,9 @@ const ChatWindow: React.FC = () => {
       
       // Determine the current stage
       let currentStage = 0;
-      if (elapsed >= stage3) {
+      if (elapsed >= stage4) {
+        currentStage = 4;
+      } else if (elapsed >= stage3) {
         currentStage = 3;
       } else if (elapsed >= stage2) {
         currentStage = 2;
