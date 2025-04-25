@@ -1,0 +1,388 @@
+# Knowledge Base Management System API Documentation
+
+
+### Get User Profile
+- **URL**: `/api/user/profile`
+- **Method**: `GET`
+- **Description**: Returns the current user's profile information
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  {
+    "id": "number",
+    "username": "string",
+    "email": "string",
+    "role": "string",
+    "created_at": "string (ISO date)",
+    "last_login": "string (ISO date)"
+  }
+  ```
+
+## User Management API (for admin role)
+
+### Get All Users
+- **URL**: `/api/admin/users`
+- **Method**: `GET`
+- **Description**: Returns a list of all users in the system
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  [
+    {
+      "id": "number",
+      "username": "string",
+      "email": "string",
+      "role": "string",
+      "created_at": "string (ISO date)"
+    }
+  ]
+  ```
+
+### Create User
+- **URL**: `/api/admin/users`
+- **Method**: `POST`
+- **Description**: Creates a new user
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "username": "string",
+    "email": "string",
+    "password": "string",
+    "role": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string",
+    "user": {
+      "id": "number",
+      "username": "string",
+      "email": "string",
+      "role": "string",
+      "created_at": "string (ISO date)"
+    }
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Update User
+- **URL**: `/api/admin/users/{user_id}`
+- **Method**: `PUT`
+- **Description**: Updates an existing user
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "username": "string",
+    "email": "string",
+    "role": "string",
+    "password": "string (optional)"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string",
+    "user": {
+      "id": "number",
+      "username": "string",
+      "email": "string",
+      "role": "string",
+      "created_at": "string (ISO date)"
+    }
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Delete User
+- **URL**: `/api/admin/users/{user_id}`
+- **Method**: `DELETE`
+- **Description**: Deletes a user
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+## PostgreSQL Management API
+
+### Get Tables
+- **URL**: `/api/postgres/tables`
+- **Method**: `GET`
+- **Description**: Returns list of tables in the PostgreSQL database
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  [
+    {
+      "table_name": "string",
+      "table_schema": "string",
+      "table_type": "string"
+    }
+  ]
+  ```
+
+### Execute Query
+- **URL**: `/api/postgres/execute`
+- **Method**: `POST`
+- **Description**: Executes a SQL query and returns the results
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "query": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "rows": [
+      {
+        "column_name1": "value1",
+        "column_name2": "value2"
+      }
+    ]
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "error": "string"
+  }
+  ```
+
+### Import Data
+- **URL**: `/api/postgres/import`
+- **Method**: `POST`
+- **Description**: Imports data from a SQL file into PostgreSQL
+- **Headers**: Authorization: Bearer {access_token}
+- **Body**: Form data with file field
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string",
+    "tables_affected": "number"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Export Data
+- **URL**: `/api/postgres/export/{table_name}`
+- **Method**: `GET`
+- **Description**: Exports data from a PostgreSQL table to a CSV file
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**: CSV file download
+- **Error Response**:
+  ```json
+  {
+    "error": "string"
+  }
+  ```
+
+## OpenSearch Management API
+
+### Get Indices
+- **URL**: `/api/opensearch/indices`
+- **Method**: `GET`
+- **Description**: Returns list of indices in OpenSearch
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  [
+    {
+      "index": "string",
+      "doc_count": "number",
+      "status": "string",
+      "health": "string"
+    }
+  ]
+  ```
+
+### Create Index
+- **URL**: `/api/opensearch/indices`
+- **Method**: `POST`
+- **Description**: Creates a new index in OpenSearch
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "index": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Delete Index
+- **URL**: `/api/opensearch/indices/{index_name}`
+- **Method**: `DELETE`
+- **Description**: Deletes an index from OpenSearch
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Search
+- **URL**: `/api/opensearch/search`
+- **Method**: `POST`
+- **Description**: Performs a search query on an OpenSearch index
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "index": "string",
+    "query": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "hits": [
+      {
+        "id": "string",
+        "index": "string",
+        "score": "number",
+        "source": "object"
+      }
+    ]
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "error": "string"
+  }
+  ```
+
+### Upload Document
+- **URL**: `/api/opensearch/upload`
+- **Method**: `POST`
+- **Description**: Uploads a document (Excel, Word, TXT) to an OpenSearch index
+- **Headers**: Authorization: Bearer {access_token}
+- **Body**: Form data with file field and index field
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+## Neo4j Management API
+
+### Get Databases
+- **URL**: `/api/neo4j/databases`
+- **Method**: `GET`
+- **Description**: Returns list of Neo4j databases
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  [
+    {
+      "name": "string",
+      "address": "string",
+      "role": "string",
+      "status": "string",
+      "default": "boolean"
+    }
+  ]
+  ```
+
+### Upload JSON Document
+- **URL**: `/api/neo4j/upload`
+- **Method**: `POST`
+- **Description**: Uploads a JSON document to a Neo4j database
+- **Headers**: Authorization: Bearer {access_token}
+- **Body**: Form data with file field and database field
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string",
+    "stats": {
+      "processed": "number",
+      "created": "number",
+      "errors": "number"
+    }
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+## Implementation Notes
+
+1. All API endpoints require authentication except for the login endpoint
+2. The Authorization header should be in the format: `Bearer {access_token}`
+3. File uploads should use multipart/form-data
+4. For security reasons, the PostgreSQL execute query endpoint should be restricted to read-only operations for most users
+5. Implement proper error handling and validation for all endpoints
+6. Consider rate limiting for the search and query endpoints
+7. Ensure proper CORS configuration for cross-origin requests
+8. Log all API requests for auditing purposes 

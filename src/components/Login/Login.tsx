@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { login as loginService } from '../../services/authService';
+import { getUserProfile } from '../../services/userService';
 
 interface LoginProps {
-  onLoginSuccess: (token: string, uuid: string) => void;
+  onLoginSuccess: (token: string, uuid: string, role: string, userData: any) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
@@ -18,35 +19,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      // 直接使用fetch发送请求，进行调试
       console.log('Attempting login with:', { username, password });
       
-      const response = await fetch('/api/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      // 使用authService中的login方法
+      const data = await loginService({ username, password });
       
-      console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-      
-      let data;
-      try {
-        if (responseText) {
-          data = JSON.parse(responseText);
-        } else {
-          throw new Error('Empty response');
-        }
-      } catch (e) {
-        console.error('JSON parse error:', e);
-        setError('Server response format error');
-        setIsLoading(false);
-        return;
-      }
-
       if (data && data.access_token) {
         // Store token in localStorage for future requests
         localStorage.setItem('access_token', data.access_token);
@@ -54,15 +31,55 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         localStorage.setItem('uuid', data.uuid);
         localStorage.setItem('expired_date', data.expired_date.toString());
         
-        // Call the callback with token information
-        onLoginSuccess(data.access_token, data.uuid);
+        // 获取用户详细信息，使用userService
+        try {
+          const userProfile = await getUserProfile();
+          
+          if (userProfile && userProfile.role) {
+            console.log('User details retrieved:', userProfile);
+            
+            // 创建完整的用户信息对象，合并用户配置文件
+            const userData = {
+              ...userProfile
+            };
+            
+            // 调用成功回调，传递用户角色和信息
+            onLoginSuccess(data.access_token, data.uuid, userProfile.role, userData);
+          } else {
+            console.error('User profile response missing role:', userProfile);
+            
+            // 如果缺少角色信息，使用mock数据（根据用户名判断角色）
+            const mockRole = getMockRole(username);
+            const mockUserData = {
+              username: username,
+              role: mockRole,
+              email: `${username}@example.com`
+            };
+            
+            console.log('Using mock user data:', mockUserData);
+            onLoginSuccess(data.access_token, data.uuid, mockRole, mockUserData);
+          }
+        } catch (profileError) {
+          console.error('Error fetching user profile:', profileError);
+          
+          // 当获取用户资料失败时，使用mock数据
+          const mockRole = getMockRole(username);
+          const mockUserData = {
+            username: username,
+            role: mockRole,
+            email: `${username}@example.com`
+          };
+          
+          console.log('Using mock user data due to error:', mockUserData);
+          onLoginSuccess(data.access_token, data.uuid, mockRole, mockUserData);
+        }
       } else {
         setError('Invalid username or password');
+        setIsLoading(false);
       }
     } catch (err) {
       setError(`Login failed: ${err instanceof Error ? err.message : String(err)}`);
       console.error('Login error:', err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -103,6 +120,18 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       </div>
     </div>
   );
+};
+
+// 根据用户名确定模拟角色
+const getMockRole = (username: string): string => {
+  const lowerUsername = username.toLowerCase();
+  if (lowerUsername.includes('admin')) {
+    return 'admin';
+  } else if (lowerUsername.includes('kb') || lowerUsername.includes('manager')) {
+    return 'kb_manager';
+  } else {
+    return 'user';
+  }
 };
 
 export default Login; 

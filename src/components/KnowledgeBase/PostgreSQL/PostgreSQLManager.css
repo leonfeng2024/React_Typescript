@@ -1,0 +1,52 @@
+.pg-container {
+  padding: 10px;
+  width: 100%;
+}
+
+.pg-card {
+  margin-bottom: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.pg-tabs {
+  margin-top: 10px;
+}
+
+.pg-textarea {
+  margin-bottom: 10px;
+  font-family: monospace;
+}
+
+.pg-button {
+  margin-right: 10px;
+  margin-bottom: 15px;
+}
+
+.pg-result {
+  margin-top: 20px;
+}
+
+.pg-table {
+  margin-top: 10px;
+}
+
+.pg-section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.pg-space {
+  width: 100%;
+}
+
+.pg-help-text {
+  color: #888;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.pg-select {
+  min-width: 200px;
+} 

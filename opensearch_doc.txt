@@ -1,0 +1,117 @@
+## OpenSearch Management API
+
+### Get Indices
+- **URL**: `/api/opensearch/indices`
+- **Method**: `GET`
+- **Description**: Returns list of indices in OpenSearch
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  [
+    {
+      "index": "string",
+      "doc_count": "number",
+      "status": "string",
+      "health": "string"
+    }
+  ]
+  ```
+
+### Create Index
+- **URL**: `/api/opensearch/indices`
+- **Method**: `POST`
+- **Description**: Creates a new index in OpenSearch
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "index": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Delete Index
+- **URL**: `/api/opensearch/indices/{index_name}`
+- **Method**: `DELETE`
+- **Description**: Deletes an index from OpenSearch
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Search
+- **URL**: `/api/opensearch/search`
+- **Method**: `POST`
+- **Description**: Performs a search query on an OpenSearch index
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "index": "string",
+    "query": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "hits": [
+      {
+        "id": "string",
+        "index": "string",
+        "score": "number",
+        "source": "object"
+      }
+    ]
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "error": "string"
+  }
+  ```
+
+### Upload Document
+- **URL**: `/api/opensearch/upload`
+- **Method**: `POST`
+- **Description**: Uploads a document (Excel, Word, TXT) to an OpenSearch index
+- **Headers**: Authorization: Bearer {access_token}
+- **Body**: Form data with file field and index field
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```

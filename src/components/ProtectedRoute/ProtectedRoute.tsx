@@ -9,8 +9,8 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, login } = useAuth();
 
-  const handleLoginSuccess = (token: string, uuid: string) => {
-    login(token, uuid);
+  const handleLoginSuccess = (token: string, uuid: string, role: string, userData: any) => {
+    login(token, uuid, role, userData);
   };
 
   if (!isAuthenticated) {

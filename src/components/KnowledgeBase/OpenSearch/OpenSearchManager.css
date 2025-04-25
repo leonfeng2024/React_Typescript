@@ -1,0 +1,71 @@
+.os-container {
+  padding: 10px;
+  width: 100%;
+}
+
+.os-card {
+  margin-bottom: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.os-tabs {
+  margin-top: 10px;
+}
+
+.os-header-actions {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.os-button {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.os-table {
+  margin-top: 10px;
+}
+
+.os-form {
+  max-width: 800px;
+}
+
+.os-input,
+.os-select,
+.os-textarea {
+  margin-bottom: 15px;
+}
+
+.os-result {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.os-content {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.os-score {
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.os-help-section {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f0f8ff;
+  border-radius: 4px;
+}
+
+.os-warning {
+  color: #ff4d4f;
+  font-weight: bold;
+} 

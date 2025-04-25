@@ -1,0 +1,82 @@
+
+## PostgreSQL Management API
+
+### Get Tables
+- **URL**: `/api/postgres/tables`
+- **Method**: `GET`
+- **Description**: Returns list of tables in the PostgreSQL database
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**:
+  ```json
+  [
+    {
+      "table_name": "string",
+      "table_schema": "string",
+      "table_type": "string"
+    }
+  ]
+  ```
+
+### Execute Query
+- **URL**: `/api/postgres/execute`
+- **Method**: `POST`
+- **Description**: Executes a SQL query and returns the results
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**:
+  ```json
+  {
+    "query": "string"
+  }
+  ```
+- **Success Response**:
+  ```json
+  {
+    "rows": [
+      {
+        "column_name1": "value1",
+        "column_name2": "value2"
+      }
+    ]
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "error": "string"
+  }
+  ```
+
+### Import Data
+- **URL**: `/api/postgres/import`
+- **Method**: `POST`
+- **Description**: Imports data from a SQL file into PostgreSQL
+- **Headers**: Authorization: Bearer {access_token}
+- **Body**: Form data with file field
+- **Success Response**:
+  ```json
+  {
+    "success": true,
+    "message": "string",
+    "tables_affected": "number"
+  }
+  ```
+- **Error Response**:
+  ```json
+  {
+    "success": false,
+    "message": "string"
+  }
+  ```
+
+### Export Data
+- **URL**: `/api/postgres/export/{table_name}`
+- **Method**: `GET`
+- **Description**: Exports data from a PostgreSQL table to a CSV file
+- **Headers**: Authorization: Bearer {access_token}
+- **Success Response**: CSV file download
+- **Error Response**:
+  ```json
+  {
+    "error": "string"
+  }
+  ```

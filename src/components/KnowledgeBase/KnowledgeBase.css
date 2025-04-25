@@ -1,0 +1,30 @@
+.kb-container {
+  padding: 20px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.kb-title {
+  color: #1890ff;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.kb-tabs {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+/* Add styles to make sure ant-design components take full width */
+.kb-tabs .ant-tabs-content {
+  width: 100%;
+}
+
+.kb-tabs .ant-tabs-tabpane {
+  width: 100%;
+} 

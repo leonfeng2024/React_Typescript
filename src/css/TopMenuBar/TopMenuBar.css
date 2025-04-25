@@ -61,3 +61,17 @@
 .tmb-avatar-circle:hover {
   background-color: #d1d5db;
 }
+
+.user-info-container {
+  min-width: 200px;
+  padding: 8px 0;
+}
+
+.user-info-container div {
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.user-info-container strong {
+  margin-right: 5px;
+}

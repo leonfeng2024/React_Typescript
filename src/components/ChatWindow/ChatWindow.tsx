@@ -1,7 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../../css/ChatWindow/ChatWindow.css';
 import ChatPanel from '../ChatPanel/ChatPanel';
-import { ChatService } from '../../services/ChatService';
+import { ChatService, ChatStreamData } from '../../services/ChatService';
+
+// Add a counter to ensure unique IDs even when generated in rapid succession
+let messageIdCounter = 0;
+
+// Function to generate unique message IDs
+const generateUniqueId = (): string => {
+  messageIdCounter += 1;
+  return `${Date.now()}-${messageIdCounter}`;
+};
 
 interface Message {
   id: string;
@@ -9,8 +18,9 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   isLoading?: boolean;
-  progressStage?: number; // 0-4 (0: start, 1: user intent, 2: knowledge base, 3: relationship graph, 4: document generation)
+  progressStage?: number; // 0-5 (0: start, 1: analyze intent, 2: identify column, 3: process data, 4: generate document, 5: complete)
   progressPercent?: number; // 0-100
+  currentStep?: string; // Backend step identifier
   sourceDocuments?: {
     document_id: string;
     content: string;
@@ -18,13 +28,30 @@ interface Message {
   }[];
 }
 
+// Map backend steps to UI progress stages and percentages
+const stepToProgressMap: Record<string, { stage: number; percent: number }> = {
+  '_analyze_user_intent': { stage: 1, percent: 20 },
+  'identify_column': { stage: 2, percent: 40 },
+  'process_start': { stage: 3, percent: 50 },
+  'opensearch_retriever': { stage: 3, percent: 60 },
+  'postgresql_retriever': { stage: 3, percent: 70 },
+  'neo4j_retriever': { stage: 3, percent: 80 },
+  'docs_retrieved': { stage: 3, percent: 85 },
+  '_process_with_llm': { stage: 4, percent: 90 },
+  'llm_process_complete': { stage: 4, percent: 95 },
+  'generating_document': { stage: 4, percent: 98 },
+  'final_answer': { stage: 5, percent: 100 }
+};
+
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // 用于存储最终回答的引用
+  const finalAnswerRef = useRef<string>('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,21 +60,12 @@ const ChatWindow: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  
-  // Clean up timer when component unmounts
-  useEffect(() => {
-    return () => {
-      if (progressTimerRef.current) {
-        clearTimeout(progressTimerRef.current);
-      }
-    };
-  }, []);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isWaitingResponse) return;
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: generateUniqueId(),
       content: inputValue,
       isUser: true,
       timestamp: new Date()
@@ -55,116 +73,96 @@ const ChatWindow: React.FC = () => {
 
     setMessages([...messages, userMessage]);
     setInputValue('');
+    setIsWaitingResponse(true);
 
-    try {
-      const loadingId = Date.now().toString();
-      const loadingMessage: Message = {
-        id: loadingId,
-        content: 'ご相談を承りました。現在対応中ですので、少々お待ちください...',
-        isUser: false,
-        timestamp: new Date(),
-        isLoading: true,
-        progressStage: 0,
-        progressPercent: 0
-      };
-      setMessages(prevMessages => [...prevMessages, loadingMessage]);
-      
-      // Start progress animation
-      simulateProgress(loadingId);
-      
-      const response = await ChatService.sendMessage(inputValue);
-      
-      // Complete the progress immediately when the response arrives
-      setMessages(prevMessages => 
-        prevMessages.map(msg => 
-          msg.id === loadingId 
-            ? { ...msg, progressPercent: 100, progressStage: 4 } 
-            : msg
-        )
-      );
-      
-      // Add small delay before showing the final message
-      setTimeout(() => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: response.message,
-          isUser: false,
-          timestamp: new Date(),
-          sourceDocuments: response.source_documents
-        };
-        
-        // Remove loading message and add real response
-        setMessages(prevMessages => 
-          prevMessages.filter(msg => msg.id !== loadingId).concat(botMessage)
-        );
-      }, 500);
-      
-    } catch (error) {
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: error instanceof Error ? error.message : 'Failed to send message',
-        isUser: false,
-        timestamp: new Date()
-      };
-      setMessages(prevMessages => {
-        // Remove loading message and add error message
-        return prevMessages.filter(msg => !msg.isLoading).concat(errorMessage);
-      });
-      console.error('Failed to get bot response:', error);
-    }
-  };
-  
-  const simulateProgress = (loadingId: string) => {
-    // Random duration between 30-40 seconds
-    const totalDuration = Math.floor(Math.random() * 10000) + 30000;
-    
-    // Define key progress points
-    const stage1 = totalDuration * 0.05; // User intent recognition ~5%
-    const stage2 = totalDuration * 0.10; // Knowledge base query ~10% 
-    const stage3 = totalDuration * 0.60; // Generate relationship graph ~60%
-    const stage4 = totalDuration * 0.90; // Document generation ~90%
-    
-    let startTime = Date.now();
-    let elapsed = 0;
-    
-    const updateProgress = () => {
-      elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / totalDuration) * 100, 99); // Cap at 99% until actual response
-      
-      // Determine the current stage
-      let currentStage = 0;
-      if (elapsed >= stage4) {
-        currentStage = 4;
-      } else if (elapsed >= stage3) {
-        currentStage = 3;
-      } else if (elapsed >= stage2) {
-        currentStage = 2;
-      } else if (elapsed >= stage1) {
-        currentStage = 1;
-      }
-      
-      // Update the message
-      setMessages(prevMessages => 
-        prevMessages.map(msg => 
-          msg.id === loadingId 
-            ? { ...msg, progressPercent: progress, progressStage: currentStage } 
-            : msg
-        )
-      );
-      
-      // Continue updating progress if we haven't reached the end
-      if (elapsed < totalDuration) {
-        progressTimerRef.current = setTimeout(updateProgress, 50);
-      }
+    // Create a loading message with initial progress state
+    const loadingId = generateUniqueId();
+    const loadingMessage: Message = {
+      id: loadingId,
+      content: 'ご相談を承りました。現在対応中ですので、少々お待ちください...',
+      isUser: false,
+      timestamp: new Date(),
+      isLoading: true,
+      progressStage: 0,
+      progressPercent: 0
     };
     
-    // Start progress updates
-    progressTimerRef.current = setTimeout(updateProgress, 50);
+    setMessages(prevMessages => [...prevMessages, loadingMessage]);
+
+    // 重置最终回答引用
+    finalAnswerRef.current = '';
+
+    // Use the new streaming API
+    await ChatService.sendMessageStream(
+      inputValue, 
+      {
+        onStepUpdate: (stepData: ChatStreamData) => {
+          // Update loading message with progress information from the backend
+          const progress = stepToProgressMap[stepData.step] || { stage: 0, percent: 10 };
+          
+          // 如果是最终回答，保存到引用中而不是立即显示
+          if (stepData.step === 'final_answer') {
+            finalAnswerRef.current = stepData.message;
+          }
+          
+          setMessages(prevMessages => 
+            prevMessages.map(msg => 
+              msg.id === loadingId 
+                ? { 
+                    ...msg, 
+                    progressStage: progress.stage, 
+                    progressPercent: progress.percent,
+                    currentStep: stepData.step,
+                  } 
+                : msg
+            )
+          );
+        },
+        onComplete: (finalAnswer: string) => {
+          // 使用保存的最终回答创建新消息
+          const responseToUse = finalAnswerRef.current || finalAnswer;
+          
+          // Create final message and remove loading message after a small delay
+          setTimeout(() => {
+            const botMessage: Message = {
+              id: generateUniqueId(),
+              content: responseToUse,
+              isUser: false,
+              timestamp: new Date(),
+            };
+            
+            // Remove loading message and add real response
+            setMessages(prevMessages => 
+              prevMessages.filter(msg => msg.id !== loadingId).concat(botMessage)
+            );
+            
+            setIsWaitingResponse(false);
+          }, 500);
+        },
+        onError: (error: Error) => {
+          // Handle error case
+          const errorMessage: Message = {
+            id: generateUniqueId(),
+            content: error.message || 'Failed to send message',
+            isUser: false,
+            timestamp: new Date()
+          };
+          
+          setMessages(prevMessages => {
+            // Remove loading message and add error message
+            return prevMessages.filter(msg => !msg.isLoading).concat(errorMessage);
+          });
+          
+          console.error('Failed to get bot response:', error);
+          setIsWaitingResponse(false);
+        }
+      }
+    );
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || isWaitingResponse) return;
 
     setIsUploading(true);
     const formData = new FormData();
@@ -179,7 +177,7 @@ const ChatWindow: React.FC = () => {
       const result = await response.json();
       
       const systemMessage: Message = {
-        id: Date.now().toString(),
+        id: generateUniqueId(),
         content: result.status === 'success' 
           ? `File "${file.name}" uploaded successfully` 
           : `Failed to upload file: ${result.message}`,
@@ -190,7 +188,7 @@ const ChatWindow: React.FC = () => {
       setMessages(prevMessages => [...prevMessages, systemMessage]);
     } catch (error) {
       const errorMessage: Message = {
-        id: Date.now().toString(),
+        id: generateUniqueId(),
         content: `Error uploading file: ${error instanceof Error ? error.message : 'Unknown error'}`,
         isUser: false,
         timestamp: new Date()
@@ -222,6 +220,7 @@ const ChatWindow: React.FC = () => {
               handleSendMessage();
             }
           }}
+          disabled={isWaitingResponse}
         />
         <div className="cw-button-group">
           <input
@@ -229,18 +228,19 @@ const ChatWindow: React.FC = () => {
             ref={fileInputRef}
             className="cw-file-input"
             onChange={handleFileUpload}
-            disabled={isUploading}
+            disabled={isUploading || isWaitingResponse}
           />
           <button 
-            className={`cw-upload-button ${isUploading ? 'uploading' : ''}`}
+            className={`cw-upload-button ${isUploading ? 'uploading' : ''} ${isWaitingResponse ? 'disabled' : ''}`}
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
+            disabled={isUploading || isWaitingResponse}
           >
             {isUploading ? 'Uploading...' : 'Upload'}
           </button>
           <button 
-            className="cw-send-button"
+            className={`cw-send-button ${isWaitingResponse ? 'disabled' : ''}`}
             onClick={handleSendMessage}
+            disabled={isWaitingResponse}
           >
             Send
           </button>

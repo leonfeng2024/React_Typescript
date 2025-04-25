@@ -1,0 +1,42 @@
+[
+  {
+    "table_name": "knowledge_documents",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "knowledge_entities",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "knowledge_relationships",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "users",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "roles",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "document_categories",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "search_logs",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  },
+  {
+    "table_name": "import_history",
+    "table_schema": "public",
+    "table_type": "BASE TABLE"
+  }
+] 

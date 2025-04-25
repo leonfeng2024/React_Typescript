@@ -1,3 +1,5 @@
+import { getApiUrl, apiEndpoints } from '../config';
+
 interface LoginResponse {
   access_token: string;
   refresh_token: string;
@@ -12,13 +14,12 @@ interface LoginCredentials {
 
 export const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
   try {
-    const response = await fetch('/api/token', {
+    const response = await fetch(getApiUrl(apiEndpoints.auth.login), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(credentials),
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -89,7 +90,7 @@ export const logout = async (): Promise<{ status: string; message: string }> => 
       return { status: 'success', message: 'Logout successful' };
     }
     
-    const response = await fetch('http://localhost:8088/api/logout', {
+    const response = await fetch(getApiUrl(apiEndpoints.auth.logout), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
