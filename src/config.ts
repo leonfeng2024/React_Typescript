@@ -29,7 +29,7 @@ const environments = {
 };
 
 // 确定当前环境
-const currentEnv = 'development';
+const currentEnv = 'production';
 const config: ApiConfig = environments[currentEnv as keyof typeof environments];
 
 // 生成完整的API URL
