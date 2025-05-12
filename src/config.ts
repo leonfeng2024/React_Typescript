@@ -71,6 +71,12 @@ export const apiEndpoints = {
     create: '/admin/users',
     update: (id: number | string) => `/admin/users/${id}`,
     delete: (id: number | string) => `/admin/users/${id}`
+  },
+  kb: {
+    sqlUpload: '/kb/sql/upload',
+    excelUpload: '/kb/excel/upload',
+    docStatus: '/kb/doc/status',
+    deleteDocument: '/kb/dataset/delete',
   }
 };
 

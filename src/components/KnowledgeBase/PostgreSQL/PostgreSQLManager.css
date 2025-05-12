@@ -49,4 +49,79 @@
 
 .pg-select {
   min-width: 200px;
+}
+
+/* KB Management styles */
+.pg-kb-status-completed {
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.pg-kb-status-processing {
+  color: #faad14;
+  font-weight: bold;
+}
+
+.pg-kb-status-failed {
+  color: #f5222d;
+  font-weight: bold;
+}
+
+.pg-kb-upload-area {
+  border: 2px dashed #d9d9d9;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  background-color: #fafafa;
+  transition: border-color 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pg-kb-upload-area:hover {
+  border-color: #1890ff;
+}
+
+.pg-kb-upload-area h4 {
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+/* Excel file upload styles */
+.pg-excel-file-info {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f0f8ff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.pg-excel-file-info p {
+  margin-bottom: 5px;
+}
+
+/* Action button styles */
+.pg-delete-btn {
+  margin: 0;
+  min-width: 80px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ensure action buttons are visible */
+.ant-table-cell .pg-delete-btn {
+  opacity: 0.9;
+}
+
+.ant-table-cell .pg-delete-btn:hover {
+  opacity: 1;
+}
+
+/* Confirmation modal styles */
+.ant-modal-confirm-content {
+  margin-top: 16px;
+  margin-bottom: 16px;
 } 
