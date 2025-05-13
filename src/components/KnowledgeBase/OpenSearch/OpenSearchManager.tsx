@@ -11,20 +11,21 @@ import {
   Form,
   Modal,
   List,
-  Select
+  Select,
+  Tag
 } from 'antd';
 import { 
   UploadOutlined, 
   SearchOutlined, 
   PlusOutlined,
   DeleteOutlined,
-  FileExcelOutlined,
-  FileWordOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  ReloadOutlined
 } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import './OpenSearchManager.css';
+import { getApiUrl, apiEndpoints } from '../../../config';
 import { 
   getIndices, 
   createIndex, 
@@ -32,8 +33,11 @@ import {
   searchIndex, 
   getUploadUrl, 
   getUploadHeaders,
+  getKBDocumentStatus,
+  deleteKBDocument,
   IndexData,
-  SearchResult
+  SearchResult,
+  KBDocumentStatus
 } from '../../../services/opensearchService';
 
 const { TextArea } = Input;
@@ -43,17 +47,19 @@ const OpenSearchManager: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [newIndexName, setNewIndexName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [kbDocumentsLoading, setKbDocumentsLoading] = useState<boolean>(false);
   const [searchIndexName, setSearchIndexName] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [kbDocuments, setKbDocuments] = useState<KBDocumentStatus[]>([]);
 
   useEffect(() => {
     fetchIndices();
+    fetchKBDocuments();
   }, []);
 
   // Fetch OpenSearch indices
   const fetchIndices = async () => {
-    console.log("###fetchIndices###")
     try {
       setLoading(true);
       const data = await getIndices();
@@ -63,6 +69,20 @@ const OpenSearchManager: React.FC = () => {
       message.error('Failed to fetch OpenSearch indices');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch KB documents status
+  const fetchKBDocuments = async () => {
+    try {
+      setKbDocumentsLoading(true);
+      const data = await getKBDocumentStatus();
+      setKbDocuments(data);
+    } catch (error) {
+      console.error('Error fetching KB document status:', error);
+      message.error('Failed to fetch KB document status');
+    } finally {
+      setKbDocumentsLoading(false);
     }
   };
 
@@ -113,24 +133,52 @@ const OpenSearchManager: React.FC = () => {
     }
   };
 
+  // Delete KB document
+  const handleDeleteKBDocument = async (documentId: number, documentName: string) => {
+    try {
+      setKbDocumentsLoading(true);
+      const response = await deleteKBDocument(documentId, documentName);
+      
+      if (response.success) {
+        message.success('Document deleted successfully');
+        fetchKBDocuments(); // Refresh documents list
+      } else {
+        message.error(response.message || 'Failed to delete document');
+      }
+    } catch (error) {
+      console.error('Error deleting KB document:', error);
+      message.error('Failed to delete document');
+    } finally {
+      setKbDocumentsLoading(false);
+    }
+  };
+
   // Upload files to an index
   const uploadProps: UploadProps = {
     name: 'file',
-    action: getUploadUrl(),
-    data: { index: searchIndexName },
+    action: getApiUrl(apiEndpoints.kb.opensearchUpload),
+    data: {
+      uploader: localStorage.getItem('username') || 'admin',
+      process_index: searchIndexName || 'procedure_index'
+    },
     headers: getUploadHeaders(),
+    accept: '.sql',
     onChange(info) {
       if (info.file.status === 'done') {
-        message.success(`${info.file.name} file uploaded and indexed successfully`);
+        message.success(`${info.file.name} file uploaded and indexing started`);
+        // Refresh the documents list after a successful upload
+        fetchKBDocuments();
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} file upload failed.`);
       }
     },
     beforeUpload(file) {
-      if (!searchIndexName) {
-        message.warning('Please select an index first');
+      const isSqlFile = file.name.toLowerCase().endsWith('.sql');
+      if (!isSqlFile) {
+        message.error('You can only upload SQL (.sql) files!');
         return false;
       }
+      
       return true;
     }
   };
@@ -171,6 +219,20 @@ const OpenSearchManager: React.FC = () => {
       return content.substring(0, 300) + '...';
     }
     return content;
+  };
+
+  // Get status tag color based on process status
+  const getStatusTagColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'green';
+      case 'pending':
+        return 'blue';
+      case 'failed':
+        return 'red';
+      default:
+        return 'default';
+    }
   };
 
   // Index columns for the table
@@ -219,6 +281,60 @@ const OpenSearchManager: React.FC = () => {
     },
   ];
 
+  // KB Document columns for the table
+  const kbDocumentColumns: ColumnsType<KBDocumentStatus> = [
+    {
+      title: 'Document Name',
+      dataIndex: 'document_name',
+      key: 'document_name',
+    },
+    {
+      title: 'Document Type',
+      dataIndex: 'document_type',
+      key: 'document_type',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'process_status',
+      key: 'process_status',
+      render: (status: string) => (
+        <Tag color={getStatusTagColor(status)}>
+          {status.toUpperCase()}
+        </Tag>
+      )
+    },
+    {
+      title: 'Upload Date',
+      dataIndex: 'upload_date',
+      key: 'upload_date',
+      render: (date: string) => new Date(date).toLocaleString()
+    },
+    {
+      title: 'Uploader',
+      dataIndex: 'uploader',
+      key: 'uploader',
+    },
+    {
+      title: 'Index Name',
+      dataIndex: 'index_name',
+      key: 'index_name',
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Button
+          type="primary"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDeleteKBDocument(record.id, record.document_name)}
+        >
+          Delete
+        </Button>
+      ),
+    },
+  ];
+
   // 定义Tabs的items配置
   const tabItems = [
     {
@@ -258,47 +374,70 @@ const OpenSearchManager: React.FC = () => {
       label: (
         <span>
           <UploadOutlined />
-          Document Upload
+          KB Document Upload
         </span>
       ),
       children: (
-        <Card title="Upload Knowledge Base Documents" className="os-card">
-          <Form layout="vertical" className="os-form">
-            <Form.Item 
-              label="Select Target Index" 
-              required
-              help="Select the index where you want to upload documents"
-            >
-              <Select
-                placeholder="Select an index"
-                style={{ width: '100%' }}
-                onChange={(value) => setSearchIndexName(value)}
-                className="os-select"
+        <>
+          <Card title="Upload Knowledge Base Documents" className="os-card">
+            <Form layout="vertical" className="os-form">
+              <Form.Item 
+                label="Select Target Index" 
+                required
+                help="Select the index where you want to upload documents"
               >
-                {indices.map(index => (
-                  <Select.Option key={index.index} value={index.index}>
-                    {index.index}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            
-            <Form.Item label="Upload Files">
-              <Upload {...uploadProps} className="os-upload">
-                <Button icon={<UploadOutlined />} className="os-button">
-                  Click to Upload
-                </Button>
-              </Upload>
+                <Select
+                  placeholder="Select an index"
+                  style={{ width: '100%' }}
+                  onChange={(value) => setSearchIndexName(value)}
+                  className="os-select"
+                >
+                  {indices.map(index => (
+                    <Select.Option key={index.index} value={index.index}>
+                      {index.index}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
               
-              <div className="os-help-section">
-                <h4>Supported File Types:</h4>
-                <p><FileExcelOutlined /> Excel (.xlsx)</p>
-                <p><FileWordOutlined /> Word (.docx)</p>
-                <p><FileTextOutlined /> Text files (.txt)</p>
-              </div>
-            </Form.Item>
-          </Form>
-        </Card>
+              <Form.Item label="Upload Files">
+                <Upload {...uploadProps} className="os-upload">
+                  <Button icon={<UploadOutlined />} className="os-button">
+                    Click to Upload
+                  </Button>
+                </Upload>
+                
+                <div className="os-help-section">
+                  <h4>Supported File Types:</h4>
+                  <p><FileTextOutlined /> SQL (.sql)</p>
+                </div>
+              </Form.Item>
+            </Form>
+          </Card>
+          
+          <Card 
+            title="Knowledge Base Documents" 
+            className="os-card"
+            extra={
+              <Button 
+                type="primary" 
+                icon={<ReloadOutlined />} 
+                onClick={fetchKBDocuments}
+              >
+                Refresh
+              </Button>
+            }
+          >
+            <Table
+              columns={kbDocumentColumns}
+              dataSource={kbDocuments}
+              rowKey="id"
+              loading={kbDocumentsLoading}
+              pagination={{ pageSize: 10 }}
+              className="os-table"
+            />
+          </Card>
+        </>
       )
     },
     {
@@ -360,13 +499,48 @@ const OpenSearchManager: React.FC = () => {
                   renderItem={item => (
                     <List.Item>
                       <List.Item.Meta
-                        title={item.title || `Document ${item.id}`}
-                        description={formatContent(item.content)}
+                        title={item.title || item.source?.procedure_name || `Document ${item.id}`}
+                        description={formatContent(item.content || item.source?.sql_content || '')}
                       />
                       <div>Score: {item.score.toFixed(2)}</div>
                     </List.Item>
                   )}
                   pagination={{ pageSize: 5 }}
+                />
+              </div>
+            )}
+            
+            {searchResults.length > 0 && (
+              <div className="os-sql-content-results">
+                <h3>SQL Content Results</h3>
+                <List
+                  bordered
+                  dataSource={searchResults}
+                  renderItem={item => {
+                    const procedureName = item.source?.procedure_name || item.title || `Document ${item.id}`;
+                    const sqlContent = item.source?.sql_content || item.content || '';
+                    
+                    return (
+                      <List.Item>
+                        <div className="sql-content-item">
+                          <div className="sql-content-header">
+                            <strong>{procedureName}</strong>
+                            <Tag color="blue">Score: {item.score.toFixed(2)}</Tag>
+                          </div>
+                          <div className="sql-content">
+                            {sqlContent ? (
+                              <pre>{sqlContent}</pre>
+                            ) : (
+                              <div>
+                                <p>No SQL content available for this result</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </List.Item>
+                    );
+                  }}
+                  pagination={{ pageSize: 3 }}
                 />
               </div>
             )}

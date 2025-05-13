@@ -59,7 +59,8 @@ export const apiEndpoints = {
     indices: '/opensearch/indices',
     search: '/opensearch/search',
     upload: '/opensearch/upload',
-    deleteIndex: (index: string) => `/opensearch/indices/${index}`
+    deleteIndex: (index: string) => `/opensearch/indices/${index}`,
+    status: '/kb/opensearch/status'
   },
   neo4j: {
     databases: '/neo4j/databases',
@@ -77,6 +78,8 @@ export const apiEndpoints = {
     excelUpload: '/kb/excel/upload',
     docStatus: '/kb/doc/status',
     deleteDocument: '/kb/dataset/delete',
+    opensearchUpload: '/kb/openserch/upload',
+    opensearchDelete: '/kb/opensearch/delete'
   }
 };
 
