@@ -124,7 +124,6 @@ export const deleteDocument = async (documentName: string, documentId?: string |
   try {
     console.log(`Attempting to delete document: ${documentName}, ID: ${documentId}`);
     
-    // 使用API端点
     const url = getApiUrl('/kb/dataset/delete');
     console.log(`Making POST request to: ${url}`);
     

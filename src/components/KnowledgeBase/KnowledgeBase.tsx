@@ -12,7 +12,6 @@ const KnowledgeBase: React.FC = () => {
     setActiveTab(key);
   };
 
-  // 定义Tabs的items配置
   const tabItems = [
     {
       key: '1',

@@ -190,7 +190,6 @@ const PostgreSQLManager: React.FC = () => {
           }
         },
         onCancel: () => {
-          // 不需要在这里设置loading状态，因为取消时不应该有loading状态
         },
       });
     } catch (error) {
@@ -364,26 +363,24 @@ const PostgreSQLManager: React.FC = () => {
             danger
             icon={<DeleteOutlined />}
             onClick={(e) => {
-              // 阻止事件冒泡，确保点击事件不会传播
               if (e && e.stopPropagation) {
                 e.stopPropagation();
               }
               
               console.log("Delete button clicked for document:", record.document_name, "ID:", record.id);
               
-              // 调用删除API，绕过确认对话框直接删除
               setDocsLoading(true);
               message.loading(`Deleting document ${record.document_name}...`, 0);
               
               deleteDocument(record.document_name, record.id)
                 .then(response => {
                   console.log("Delete response received:", response);
-                  message.destroy(); // 清除所有消息
+                  message.destroy();
                   
                   if (response && response.status === 'success') {
                     message.success(`Document "${record.document_name}" has been deleted`);
                     console.log("Refreshing document list...");
-                    fetchDocuments(); // 刷新列表
+                    fetchDocuments();
                   } else {
                     message.error(response?.message || 'Delete operation failed');
                     setDocsLoading(false);
@@ -391,7 +388,7 @@ const PostgreSQLManager: React.FC = () => {
                 })
                 .catch(error => {
                   console.error("Delete operation error:", error);
-                  message.destroy(); // 清除所有消息
+                  message.destroy();
                   message.error(`Failed to delete document: ${error.message}`);
                   setDocsLoading(false);
                 });
@@ -405,7 +402,6 @@ const PostgreSQLManager: React.FC = () => {
     }
   ];
 
-  // 定义Tabs的items配置
   const tabItems = [
     {
       key: '1',
