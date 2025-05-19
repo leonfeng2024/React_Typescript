@@ -1,8 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { apiEndpoints } from '../config';
-import opensearchIndices from '../mock/opensearch/indices.json';
-import opensearchSearchResults from '../mock/opensearch/search-results.json';
 import neo4jDatabases from '../mock/neo4j/databases.json';
 import neo4jUploadStats from '../mock/neo4j/upload-stats.json';
 
@@ -44,35 +42,6 @@ export const initMockAPI = () => {
     } else {
       return [401, { error: 'Invalid credentials' }];
     }
-  });
-
-  // PostgreSQL APIs - 移除PostgreSQL相关的mock数据，使用真实API
-
-  // OpenSearch APIs
-  mock.onGet(apiEndpoints.opensearch.indices).reply(async () => {
-    await delay(700);
-    return [200, { success: true, data: opensearchIndices }];
-  });
-
-  mock.onPost(apiEndpoints.opensearch.indices).reply(async (config: AxiosRequestConfig) => {
-    await delay(900);
-    const { name } = JSON.parse(config.data as string);
-    return [200, { success: true, message: `Index ${name} created successfully` }];
-  });
-
-  mock.onDelete(new RegExp(apiEndpoints.opensearch.deleteIndex('.*'))).reply(async () => {
-    await delay(800);
-    return [200, { success: true, message: 'Index deleted successfully' }];
-  });
-
-  mock.onPost(apiEndpoints.opensearch.search).reply(async () => {
-    await delay(1000);
-    return [200, { success: true, data: opensearchSearchResults }];
-  });
-
-  mock.onPost(apiEndpoints.opensearch.upload).reply(async () => {
-    await delay(2000);
-    return [200, { success: true, message: 'Document uploaded and indexed successfully' }];
   });
 
   // Neo4j APIs

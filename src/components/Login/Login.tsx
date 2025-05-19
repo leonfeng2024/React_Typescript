@@ -21,7 +21,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     try {
       console.log('Attempting login with:', { username, password });
       
-      // 使用authService中的login方法
       const data = await loginService({ username, password });
       
       if (data && data.access_token) {
@@ -38,17 +37,14 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           if (userProfile && userProfile.role) {
             console.log('User details retrieved:', userProfile);
             
-            // 创建完整的用户信息对象，合并用户配置文件
             const userData = {
               ...userProfile
             };
             
-            // 调用成功回调，传递用户角色和信息
             onLoginSuccess(data.access_token, data.uuid, userProfile.role, userData);
           } else {
             console.error('User profile response missing role:', userProfile);
             
-            // 如果缺少角色信息，使用mock数据（根据用户名判断角色）
             const mockRole = getMockRole(username);
             const mockUserData = {
               username: username,
@@ -62,7 +58,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         } catch (profileError) {
           console.error('Error fetching user profile:', profileError);
           
-          // 当获取用户资料失败时，使用mock数据
           const mockRole = getMockRole(username);
           const mockUserData = {
             username: username,
@@ -122,7 +117,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   );
 };
 
-// 根据用户名确定模拟角色
 const getMockRole = (username: string): string => {
   const lowerUsername = username.toLowerCase();
   if (lowerUsername.includes('admin')) {

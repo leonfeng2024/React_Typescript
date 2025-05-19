@@ -50,7 +50,6 @@ const ChatWindow: React.FC = () => {
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // 用于存储最终回答的引用
   const finalAnswerRef = useRef<string>('');
 
   const scrollToBottom = () => {
@@ -89,7 +88,6 @@ const ChatWindow: React.FC = () => {
     
     setMessages(prevMessages => [...prevMessages, loadingMessage]);
 
-    // 重置最终回答引用
     finalAnswerRef.current = '';
 
     // Use the new streaming API
@@ -119,7 +117,6 @@ const ChatWindow: React.FC = () => {
           );
         },
         onComplete: (finalAnswer: string) => {
-          // 使用保存的最终回答创建新消息
           const responseToUse = finalAnswerRef.current || finalAnswer;
           
           // Create final message and remove loading message after a small delay

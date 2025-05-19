@@ -11,25 +11,19 @@ export interface UserProfile {
   created_at?: string;
 }
 
-// API响应接口
 export interface ApiResponse {
   success: boolean;
   message: string;
 }
 
-// 创建用户响应接口
 export interface CreateUserResponse extends ApiResponse {
   user: UserProfile;
 }
 
-// 更新用户响应接口
 export interface UpdateUserResponse extends ApiResponse {
   user: UserProfile;
 }
 
-/**
- * 获取当前用户信息
- */
 export const getUserProfile = async (): Promise<UserProfile> => {
   try {
     const response = await fetch(getApiUrl(apiEndpoints.user.profile), {
@@ -48,9 +42,6 @@ export const getUserProfile = async (): Promise<UserProfile> => {
   }
 };
 
-/**
- * 获取所有用户列表（仅管理员可用）
- */
 export const getAllUsers = async (): Promise<UserProfile[]> => {
   try {
     const response = await fetch(getApiUrl(apiEndpoints.user.list), {
@@ -69,9 +60,6 @@ export const getAllUsers = async (): Promise<UserProfile[]> => {
   }
 };
 
-/**
- * 创建新用户（仅管理员可用）
- */
 export const createUser = async (userData: Omit<UserProfile, 'id' | 'created_at'>): Promise<UserProfile> => {
   try {
     const response = await fetch(getApiUrl(apiEndpoints.user.create), {
@@ -97,9 +85,6 @@ export const createUser = async (userData: Omit<UserProfile, 'id' | 'created_at'
   }
 };
 
-/**
- * 更新用户信息（仅管理员可用）
- */
 export const updateUser = async (userId: number | string, userData: Partial<UserProfile>): Promise<UserProfile> => {
   try {
     const response = await fetch(getApiUrl(apiEndpoints.user.update(userId)), {
@@ -125,9 +110,6 @@ export const updateUser = async (userId: number | string, userData: Partial<User
   }
 };
 
-/**
- * 删除用户（仅管理员可用）
- */
 export const deleteUser = async (userId: number | string): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await fetch(getApiUrl(apiEndpoints.user.delete(userId)), {

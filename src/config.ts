@@ -6,7 +6,7 @@ interface ApiConfig {
   basePath: string;
 }
 
-// 环境配置
+// environment configuration
 const environments = {
   development: {
     protocol: 'http',
@@ -28,11 +28,11 @@ const environments = {
   }
 };
 
-// 确定当前环境
+// determine the current environment
 const currentEnv = 'production';
 const config: ApiConfig = environments[currentEnv as keyof typeof environments];
 
-// 生成完整的API URL
+// generate the complete API URL
 export const getApiUrl = (path: string = ''): string => {
   const { protocol, host, port, basePath } = config;
   const portString = port ? `:${port}` : '';
@@ -40,7 +40,7 @@ export const getApiUrl = (path: string = ''): string => {
   return path ? `${baseUrl}${path.startsWith('/') ? path : `/${path}`}` : baseUrl;
 };
 
-// 各服务的API端点
+// API endpoints for each service
 export const apiEndpoints = {
   auth: {
     login: '/token',
@@ -83,14 +83,14 @@ export const apiEndpoints = {
   }
 };
 
-// API 请求超时时间配置（毫秒）
+// API request timeout configuration (milliseconds)
 export const apiTimeouts = {
-  default: 30000, // 30秒
-  chat: 5 * 60 * 1000, // 5分钟
-  upload: 2 * 60 * 1000 // 2分钟
+  default: 30000, // 30 seconds
+  chat: 5 * 60 * 1000, // 5 minutes
+  upload: 2 * 60 * 1000 // 2 minutes
 };
 
-// 导出默认的API配置
+// export the default API configuration
 export default {
   apiConfig: config,
   getApiUrl,

@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 interface UserInfo {
   username: string;
   role: string;
-  [key: string]: any; // 允许其他属性
+  [key: string]: any;
 }
 
 interface AuthContextType {
@@ -43,7 +43,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUuid(storedUuid);
       setIsAuthenticated(true);
       
-      // 从cookie恢复用户角色和信息
       if (storedRole) {
         setUserRole(storedRole);
         console.log('Restored user role from cookie:', storedRole);
@@ -76,15 +75,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUserInfo(userData);
     setIsAuthenticated(true);
     
-    // 保存用户角色和信息到cookie
-    Cookies.set('userRole', role, { expires: 1 }); // 1天过期
+    Cookies.set('userRole', role, { expires: 1 });
     Cookies.set('userInfo', JSON.stringify(userData), { expires: 1 });
     console.log('Saved to cookies - Role:', role, 'User info:', userData);
   };
 
   const logout = async () => {
     try {
-      // Call the logout API
       await logoutApi();
     } catch (error) {
       console.error('Error during logout:', error);

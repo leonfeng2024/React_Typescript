@@ -170,12 +170,10 @@ export const deleteDocument = async (documentName: string, documentId?: string |
       if (responseText) {
         result = JSON.parse(responseText);
       } else {
-        // 如果响应为空，创建一个默认的成功响应
         result = { status: 'success', message: 'Document deleted successfully' };
       }
     } catch (e) {
       console.error('Error parsing success response:', e);
-      // 如果解析JSON失败，创建一个默认的成功响应
       result = { status: 'success', message: 'Document deleted successfully' };
     }
     

@@ -141,13 +141,17 @@ const OpenSearchManager: React.FC = () => {
       
       if (response.success) {
         message.success('Document deleted successfully');
-        fetchKBDocuments(); // Refresh documents list
+        fetchKBDocuments(); // 刷新文档列表
       } else {
         message.error(response.message || 'Failed to delete document');
+        // 即使删除失败，也刷新列表以确保显示的是最新状态
+        fetchKBDocuments();
       }
     } catch (error) {
       console.error('Error deleting KB document:', error);
       message.error('Failed to delete document');
+      // 发生错误时也刷新列表
+      fetchKBDocuments();
     } finally {
       setKbDocumentsLoading(false);
     }
