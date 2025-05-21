@@ -17,7 +17,7 @@ const environments = {
   production: {
     protocol: 'http',
     host: 'localhost',
-    port: 8088,
+    port: 80,
     basePath: '/api'
   },
   docker_deploy: {
