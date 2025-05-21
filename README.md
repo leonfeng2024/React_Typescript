@@ -1,6 +1,3 @@
-# React_Typescript
-React_Typescript
-
 # local run 
 npm start 
 

@@ -1,0 +1,157 @@
+# Neo4j Management Tab - Backend API Requirements
+
+## Overview
+This document outlines all the backend API endpoints required for the Neo4j Management Tab functionality. These APIs provide interaction with Neo4j graph databases for relationship visualization and relationship import.
+
+## Required Endpoints
+
+### 1. Get Neo4j Databases
+- **Endpoint**: `/neo4j/databases`
+- **Method**: GET
+- **Description**: Retrieves a list of available Neo4j databases
+- **Authentication**: Required - Bearer token
+- **Response Format**:
+```json
+[
+  {
+    "name": "knowledge_graph",
+    "address": "neo4j://localhost:7687",
+    "role": "primary",
+    "status": "online",
+    "default": true
+  },
+  {
+    "name": "product_graph",
+    "address": "neo4j://localhost:7687", 
+    "role": "primary",
+    "status": "online",
+    "default": false
+  }
+]
+```
+
+### 2. Execute Relationship Query
+- **Endpoint**: `/neo4j/execute-query`
+- **Method**: POST
+- **Description**: Executes a Cypher query to retrieve nodes and relationships for visualization
+- **Authentication**: Required - Bearer token
+- **Request Body**:
+```json
+{
+  "database": "knowledge_graph",
+  "query": "MATCH path = (n)-[*1..3]-(m) WHERE ANY(label IN labels(n) WHERE label CONTAINS 'Employee') OR ANY(label IN labels(m) WHERE label CONTAINS 'Employee') OR ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS 'Employee') OR ANY(prop IN keys(m) WHERE toString(m[prop]) CONTAINS 'Employee') RETURN path LIMIT 100"
+}
+```
+- **Response Format**:
+```json
+{
+  "nodes": [
+    {
+      "id": "1",
+      "labels": ["Employee"],
+      "properties": {
+        "employee_id": "E001",
+        "name": "John Smith",
+        "position": "Manager",
+        "department": "Sales"
+      }
+    },
+    {
+      "id": "2",
+      "labels": ["Department"],
+      "properties": {
+        "department_id": "D001",
+        "name": "Sales",
+        "location": "Building A"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "r1",
+      "type": "WORKS_IN",
+      "startNodeId": "1",
+      "endNodeId": "2",
+      "properties": {
+        "since": "2018-01-01"
+      }
+    }
+  ]
+}
+```
+
+### 3. Execute Relationship Import
+- **Endpoint**: `/neo4j/execute-queries`
+- **Method**: POST
+- **Description**: Executes multiple Cypher queries to create relationships between existing nodes
+- **Authentication**: Required - Bearer token
+- **Request Body**:
+```json
+{
+  "database": "knowledge_graph",
+  "queries": [
+    "MATCH (a:employees), (b:departments) WHERE a.employee_id = b.department_id MERGE (a)-[:RELATES_TO]->(b)",
+    "MATCH (a:employees), (b:employees) WHERE a.manager_id = b.employee_id MERGE (a)-[:RELATES_TO]->(b)"
+  ]
+}
+```
+- **Response Format**:
+```json
+{
+  "created": 12,
+  "elapsed": 234,
+  "status": "success"
+}
+```
+
+## Implementation Notes
+
+### Authentication
+All API endpoints require authentication using a Bearer token in the Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+### Error Handling
+API responses should include appropriate HTTP status codes and error messages:
+- 400: Bad Request - Invalid input parameters
+- 401: Unauthorized - Missing or invalid authentication
+- 404: Not Found - Database or resource not found
+- 500: Internal Server Error - Server-side errors
+
+### Neo4j Connection Details
+The backend should manage Neo4j connection details securely:
+```
+NEO4J_HOST = "localhost"
+NEO4J_BOLT_PORT = 7687
+NEO4J_HTTP_PORT = 7474
+NEO4J_URI = f"bolt://{NEO4J_HOST}:{NEO4J_BOLT_PORT}"
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = "neo4j2025"
+```
+
+### Security Considerations
+- Sanitize all Cypher queries to prevent injection attacks
+- Limit query results to prevent excessive data retrieval
+- Implement proper user permissions for different Neo4j databases
+- Consider rate limiting to prevent abuse
+
+## Example Cypher Queries
+
+### Relationship Query (Template)
+```cypher
+MATCH path = (n)-[*1..{depth}]-(m)
+WHERE ANY(label IN labels(n) WHERE label CONTAINS '{keyword}') 
+   OR ANY(label IN labels(m) WHERE label CONTAINS '{keyword}')
+   OR ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS '{keyword}')
+   OR ANY(prop IN keys(m) WHERE toString(m[prop]) CONTAINS '{keyword}')
+RETURN path
+LIMIT 100
+```
+
+### Relationship Import (Template)
+```cypher
+MATCH (a:{sourceLabel}), (b:{targetLabel})
+WHERE a.{sourceProp} = b.{targetProp}
+MERGE (a)-[:RELATES_TO]->(b)
+``` 

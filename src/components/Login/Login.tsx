@@ -44,29 +44,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             onLoginSuccess(data.access_token, data.uuid, userProfile.role, userData);
           } else {
             console.error('User profile response missing role:', userProfile);
-            
-            const mockRole = getMockRole(username);
-            const mockUserData = {
-              username: username,
-              role: mockRole,
-              email: `${username}@example.com`
-            };
-            
-            console.log('Using mock user data:', mockUserData);
-            onLoginSuccess(data.access_token, data.uuid, mockRole, mockUserData);
+            setError('Error retrieving user profile: Missing role information');
+            setIsLoading(false);
           }
         } catch (profileError) {
           console.error('Error fetching user profile:', profileError);
-          
-          const mockRole = getMockRole(username);
-          const mockUserData = {
-            username: username,
-            role: mockRole,
-            email: `${username}@example.com`
-          };
-          
-          console.log('Using mock user data due to error:', mockUserData);
-          onLoginSuccess(data.access_token, data.uuid, mockRole, mockUserData);
+          setError(`Error fetching user profile: ${profileError instanceof Error ? profileError.message : String(profileError)}`);
+          setIsLoading(false);
         }
       } else {
         setError('Invalid username or password');
@@ -115,17 +99,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       </div>
     </div>
   );
-};
-
-const getMockRole = (username: string): string => {
-  const lowerUsername = username.toLowerCase();
-  if (lowerUsername.includes('admin')) {
-    return 'admin';
-  } else if (lowerUsername.includes('kb') || lowerUsername.includes('manager')) {
-    return 'kb_manager';
-  } else {
-    return 'user';
-  }
 };
 
 export default Login; 

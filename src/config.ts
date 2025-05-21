@@ -10,9 +10,9 @@ interface ApiConfig {
 const environments = {
   development: {
     protocol: 'http',
-    host: 'localhost',
-    port: 8000,
-    basePath: process.env.REACT_APP_API_BASE_URL || ''
+    host: 'bibot',
+    port: 80,
+    basePath: '/api'
   },
   production: {
     protocol: 'http',
@@ -20,16 +20,16 @@ const environments = {
     port: 8088,
     basePath: '/api'
   },
-  test: {
+  docker_deploy: {
     protocol: 'http',
     host: 'localhost',
     port: 8088,
-    basePath: ''
+    basePath: '/api'
   }
 };
 
 // determine the current environment
-const currentEnv = 'production';
+const currentEnv = 'development';
 const config: ApiConfig = environments[currentEnv as keyof typeof environments];
 
 // generate the complete API URL
@@ -64,7 +64,9 @@ export const apiEndpoints = {
   },
   neo4j: {
     databases: '/neo4j/databases',
-    upload: '/neo4j/upload'
+    upload: '/neo4j/upload',
+    executeQuery: '/neo4j/execute-query',
+    executeQueries: '/neo4j/execute-queries'
   },
   user: {
     profile: '/user/profile',
